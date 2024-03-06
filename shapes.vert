@@ -6,6 +6,7 @@ out vec4 vertexColor;
 out vec2 TexCord;
 void main(){
      gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
-    vertexColor = vec4(aColor,1.0f);
-    TexCord = aTexCord;
+     vertexColor = vec4(aColor,1.0f);
+     //TexCord = vec2(1-aTexCord.x,aTexCord.y);  练习6.3 第一种方法
+     TexCord = aTexCord;
 }

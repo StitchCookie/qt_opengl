@@ -5,5 +5,6 @@
         <file>awesomeface.png</file>
         <file>container.jpg</file>
         <file>wall.jpg</file>
+        <file>wrap.png</file>
     </qresource>
 </RCC>
