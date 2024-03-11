@@ -46,6 +46,41 @@ void COpenGlWidget::setWrirFame(bool wireFrame)
     update();
     doneCurrent();
 }
+
+QMatrix4x4 COpenGlWidget::calculate_lookAt_matrix(QVector3D position, QVector3D target, QVector3D worldUp)
+{
+    // 首先我们应该计算摄像机的方向向量 也就是摄像机的z轴
+    QVector3D zaxis = QVector3D(position - target);
+    zaxis.normalize();  // 方向向量
+    // 通过方向向量和上向量计算得出 右向量 也就是x向量
+    QVector3D xaxis = QVector3D::crossProduct(worldUp,zaxis);
+    xaxis.normalize();
+    // 计算出上向量
+    QVector3D yaxis = QVector3D::crossProduct(zaxis,xaxis);
+    yaxis.normalize();
+    //
+    QMatrix4x4 translation;
+    translation.setToIdentity();
+    translation.translate(-position.x(),-position.y(),-position.z());
+    QMatrix4x4 rotation;
+    rotation.setToIdentity();
+    rotation(0, 0) = xaxis.x();
+    rotation(1, 0) = xaxis.y();
+    rotation(2, 0) = xaxis.z();
+    rotation(0, 1) = yaxis.x();
+    rotation(1, 1) = yaxis.y();
+    rotation(2, 1) = yaxis.z();
+    rotation(0, 2) = zaxis.x();
+    rotation(1, 2) = zaxis.y();
+    rotation(2, 2) = zaxis.z();
+
+    // 为了构成完整的4x4矩阵，第四行（最后一行）需要设置为(0, 0, 0, 1)以保证齐次坐标系下的正确性
+    rotation(0, 3) = 0.0f;
+    rotation(1, 3) = 0.0f;
+    rotation(2, 3) = 0.0f;
+    rotation(3, 3) = 1.0f;
+    return rotation * translation;
+}
 void COpenGlWidget::slots_timeout()
 {
 
@@ -107,7 +142,9 @@ void COpenGlWidget::paintGL()
     QMatrix4x4 projection;
     projection.perspective(m_camera.m_zoom, this->width() / this->height(), 0.1f, 100.0f);
     // view.lookAt(m_camera.m_cameraPos,m_camera.m_cameraPos + m_camera.m_cameraLookAtFrontDirection,m_camera.m_cameraUpDirection);
-    view = m_camera.GetViewMatrix();
+
+    //view = m_camera.GetViewMatrix();
+    view = calculate_lookAt_matrix(m_camera.m_cameraPos,m_camera.m_cameraPos + m_camera.m_cameraLookAtFrontDirection,m_camera.m_cameraUpDirection);
     glClearColor(0.2f,0.3f,0.3f,1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shaderProgramObject.bind();

@@ -95,6 +95,8 @@ public:
     // VAO和VBO变量（无符号整型）
     unsigned int VAO_id,VBO_id, EBO_id;
 
+    QMatrix4x4 calculate_lookAt_matrix(QVector3D position,QVector3D target,QVector3D worldUp);
+
 public slots:
     void slots_timeout();
 protected:
