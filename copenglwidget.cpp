@@ -64,6 +64,15 @@ QMatrix4x4 COpenGlWidget::calculate_lookAt_matrix(QVector3D position, QVector3D 
     translation.translate(-position.x(),-position.y(),-position.z());
     QMatrix4x4 rotation;
     rotation.setToIdentity();
+    // QVector4D colunm1(xaxis.x(),yaxis.x(),zaxis.x(),0.0f);
+    // QVector4D colunm2(xaxis.y(),yaxis.y(),zaxis.y(),0.0f);
+    // QVector4D colunm3(xaxis.z(),yaxis.z(),zaxis.z(),0.0f);
+    // QVector4D colunm4(0.0f,0.0f,0.0f,1.0f);
+    // rotation.setColumn(0,colunm1);
+    // rotation.setColumn(1,colunm2);
+    // rotation.setColumn(2,colunm3);
+    // rotation.setColumn(3,colunm4);
+
     rotation(0, 0) = xaxis.x();
     rotation(1, 0) = xaxis.y();
     rotation(2, 0) = xaxis.z();
