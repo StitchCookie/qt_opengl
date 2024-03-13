@@ -18,9 +18,9 @@ COpenGlWidget::COpenGlWidget(QWidget *parent):QOpenGLWidget(parent)
     flag = false;
     installEventFilter(this);
     timer.setInterval(1000);
-  connect(&timer,&QTimer::timeout,this,&COpenGlWidget::slots_timeout);
-   timer.start();
-  timerElapsed.start();
+    connect(&timer,&QTimer::timeout,this,&COpenGlWidget::slots_timeout);
+    timer.start();
+    timerElapsed.start();
     m_camera.m_cameraPos = QVector3D(0.0f,0.0f,3.0f);
 }
 COpenGlWidget::~COpenGlWidget()
@@ -86,15 +86,15 @@ QMatrix4x4 COpenGlWidget::calculate_lookAt_matrix(QVector3D position, QVector3D 
 
 void COpenGlWidget::slots_timeout()
 {
-//    float x = static_cast<float>(sin(timerElapsed.elapsed())) * 2.0f;
-//    float y = static_cast<float>(cos(timerElapsed.elapsed())) / 2.0f;
+    //    float x = static_cast<float>(sin(timerElapsed.elapsed())) * 2.0f;
+    //    float y = static_cast<float>(cos(timerElapsed.elapsed())) / 2.0f;
     static float yaw = 0;
     yaw += 0.26;
     if(yaw > (3.1415926 * 2)) yaw = 0;
     static float length = sqrt(lightLocation.x() * lightLocation.x() + lightLocation.y() * lightLocation.y());
     //lightLocation.setX(cos(yaw) * length);
-    lightLocation.setY(sin(yaw) * length);
-    lightLocation.setZ(sin(yaw) * length);
+    //lightLocation.setY(sin(yaw) * length);
+    //lightLocation.setZ(sin(yaw) * length);
     update();
 }
 
@@ -119,7 +119,7 @@ void COpenGlWidget::initializeGL()
     glGenVertexArrays(1,&VAO_id_Lighting);
     glBindVertexArray(VAO_id_Lighting);
     glBindBuffer(GL_ARRAY_BUFFER,VBO_id);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof (float),(void*)(0 * sizeof(float)));
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof (float),(void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -141,25 +141,22 @@ void COpenGlWidget::paintGL()
 {
     QMatrix4x4 view; // 观察矩阵
     QMatrix4x4 model;
-
     QMatrix4x4 projection;
 
     projection.perspective(m_camera.m_zoom, this->width() / this->height(), 0.1f, 100.0f);
-
     view = m_camera.GetViewMatrix();
     // view = calculate_lookAt_matrix(m_camera.m_cameraPos,m_camera.m_cameraPos + m_camera.m_cameraLookAtFrontDirection,m_camera.m_cameraUpDirection);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    QVector3D lightColor;
+    QVector3D diffuseColor;
+    QVector3D ambientColor;
     switch (m_shape){
     case Rect:
         shaderProgramObject.bind();
-        shaderProgramObject.setUniformValue("lightColor",QVector3D(1.0f,1.0f,1.0f));
-        shaderProgramObject.setUniformValue("lightPos",lightLocation);
-        shaderProgramObject.setUniformValue("projection",projection);
+        shaderProgramObject.setUniformValue("light.positon",lightLocation);
         shaderProgramObject.setUniformValue("viewPos",m_camera.m_cameraPos);
-        shaderProgramObject.setUniformValue("view",view);
-
 
         // 根据时间变化光照
 
@@ -171,21 +168,39 @@ void COpenGlWidget::paintGL()
         shaderProgramObject.setUniformValue("material.shininess", 32.0f);
 
         // 设置光源属性
-        shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.2f, 0.2f, 0.2f));
-        shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.5f, 0.5f, 0.5f)); // 将光照调暗了一些以搭配场景
+
+        //shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.2f, 0.2f, 0.2f));
+        //shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.5f, 0.5f, 0.5f)); // 将光照调暗了一些以搭配场景
         shaderProgramObject.setUniformValue("light.specular",  QVector3D(1.0f, 1.0f, 1.0f));
 
+        // 尝试改变光源的环境光和漫反射颜色 从而很容易地让光源的颜色随着时间变化：
+        lightColor.setX(static_cast<float>(sin(timerElapsed.elapsed() * 2.0f)));
+        lightColor.setY(static_cast<float>(sin(timerElapsed.elapsed() * 0.7f)));
+        lightColor.setZ(static_cast<float>(sin(timerElapsed.elapsed() * 1.3f)));
+
+        diffuseColor = lightColor * QVector3D(0.5f,0.5f,0.5f);
+        ambientColor = diffuseColor *QVector3D(0.2f,0.2f,0.2f);
+
+        shaderProgramObject.setUniformValue("light.ambient",ambientColor); // 降低影响
+        shaderProgramObject.setUniformValue("light.diffuse",  diffuseColor ); // 影响更低 这会导致光源并不会大多影响物体的材质颜色
+
+
+        shaderProgramObject.setUniformValue("projection",projection);
+        shaderProgramObject.setUniformValue("view",view);
         model.setToIdentity();
+        model.rotate(30,-1.0,1.0,-1);
+        model.rotate(15,0.0,0.0,1);   //这是是为了效果做的旋转
         shaderProgramObject.setUniformValue("model",model);
         glBindVertexArray(VAO_id);
         glDrawArrays(GL_TRIANGLES,0,36);
 
         shaderProgramLighting.bind();
-        model.setToIdentity();
-        model.translate(lightLocation);
-        model.scale(0.2f);
+
         shaderProgramLighting.setUniformValue("projection",projection);
         shaderProgramLighting.setUniformValue("view",view);
+        model.setToIdentity();
+        model.translate(lightLocation);
+        model.scale(0.2f,0.2f,0.2f);
         shaderProgramLighting.setUniformValue("model",model);
         glBindVertexArray(VAO_id_Lighting);
 

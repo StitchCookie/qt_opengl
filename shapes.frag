@@ -15,10 +15,9 @@ struct Light {
 };
 
 out vec4 FragColor;
-uniform vec3  lightColor;
-uniform vec3 lightPos; // 光源位置
 in vec3 Normal;
 in vec3 FragPos;
+
 uniform Material material;
 uniform Light light;
 
@@ -31,7 +30,7 @@ void main(){
     // 将法线单位化
     vec3 norm = normalize(Normal);
     // 将光的方向向量单位化
-    vec3 lightDir = normalize(lightPos -  FragPos);
+    vec3 lightDir = normalize(light.positon -  FragPos);
     // 只有在小于90度时才会贡献漫反射光照
     float diff = max(dot(norm,lightDir),0.0f);
     // 漫反射光照值 = 光源 X 角度 X diffuse材质向量
