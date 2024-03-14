@@ -91,11 +91,11 @@ void COpenGlWidget::slots_timeout()
     static float yaw = 0;
     yaw += 0.26;
     if(yaw > (3.1415926 * 2)) yaw = 0;
-    static float length = sqrt(lightLocation.x() * lightLocation.x() + lightLocation.y() * lightLocation.y());
-    //lightLocation.setX(cos(yaw) * length);
-    //lightLocation.setY(sin(yaw) * length);
-    //lightLocation.setZ(sin(yaw) * length);
-    update();
+//    static float length = sqrt(lightLocation.x() * lightLocation.x() + lightLocation.y() * lightLocation.y());
+//    lightLocation.setX(cos(yaw) * length);
+//    lightLocation.setY(sin(yaw) * length);
+//    lightLocation.setZ(sin(yaw) * length);
+     update();
 }
 
 void COpenGlWidget::initializeGL()
@@ -162,9 +162,14 @@ void COpenGlWidget::paintGL()
 
 
         // 物体材质 使用材质后 不再固定使用一直颜色作为物体颜色来计算了
-        shaderProgramObject.setUniformValue("material.ambient",  QVector3D(1.0f, 0.5f, 0.31f));
-        shaderProgramObject.setUniformValue("material.diffuse",  QVector3D(1.0f, 0.5f, 0.31f));
-        shaderProgramObject.setUniformValue("material.specular", QVector3D(0.5f, 0.5f, 0.5f));
+        //        shaderProgramObject.setUniformValue("material.ambient",  QVector3D(1.0f, 0.5f, 0.31f));
+        //        shaderProgramObject.setUniformValue("material.diffuse",  QVector3D(1.0f, 0.5f, 0.31f));
+        //        shaderProgramObject.setUniformValue("material.specular", QVector3D(0.5f, 0.5f, 0.5f));
+        //        shaderProgramObject.setUniformValue("material.shininess", 32.0f);
+
+        shaderProgramObject.setUniformValue("material.ambient",  QVector3D(	0.0f,0.1f,0.06f));
+        shaderProgramObject.setUniformValue("material.diffuse",  QVector3D(	0.0f, 0.50980392f, 0.50980392f));
+        shaderProgramObject.setUniformValue("material.specular", QVector3D(0.50196078f, 0.50196078f, 0.50196078f));
         shaderProgramObject.setUniformValue("material.shininess", 32.0f);
 
         // 设置光源属性
@@ -181,15 +186,19 @@ void COpenGlWidget::paintGL()
         diffuseColor = lightColor * QVector3D(0.5f,0.5f,0.5f);
         ambientColor = diffuseColor *QVector3D(0.2f,0.2f,0.2f);
 
-        shaderProgramObject.setUniformValue("light.ambient",ambientColor); // 降低影响
-        shaderProgramObject.setUniformValue("light.diffuse",  diffuseColor ); // 影响更低 这会导致光源并不会大多影响物体的材质颜色
+//        shaderProgramObject.setUniformValue("light.ambient",ambientColor); // 降低影响
+//        shaderProgramObject.setUniformValue("light.diffuse",  diffuseColor ); // 影响更低 这会导致光源并不会大多影响物体的材质颜色
 
+        // 青色塑料(Cyan Plastic)
+        shaderProgramObject.setUniformValue("light.ambient",QVector3D(1.0f, 1.0f, 1.0f));
+        shaderProgramObject.setUniformValue("light.diffuse",QVector3D(1.0f, 1.0f, 1.0f) );
 
         shaderProgramObject.setUniformValue("projection",projection);
         shaderProgramObject.setUniformValue("view",view);
         model.setToIdentity();
-        model.rotate(30,-1.0,1.0,-1);
-        model.rotate(15,0.0,0.0,1);   //这是是为了效果做的旋转
+        // 根据右手法则 右手握住这个向量方向,那么手指背面指向的方向就是旋转轴的正方向
+        model.rotate(25,-1.0,1.0,-1.0);
+
         shaderProgramObject.setUniformValue("model",model);
         glBindVertexArray(VAO_id);
         glDrawArrays(GL_TRIANGLES,0,36);
