@@ -8,7 +8,7 @@
 #define TIMEOUTMESC 100
 float ratio = 0.5;
 
-QVector3D lightLocation = QVector3D(0.0f,1.5f,0.0f);
+QVector3D lightLocation = QVector3D(1.2f,1.0f,2.0f);
 
 COpenGlWidget::COpenGlWidget(QWidget *parent):QOpenGLWidget(parent)
 {
