@@ -1,4 +1,4 @@
-﻿#ifndef COPENGLWIDGET_H
+#ifndef COPENGLWIDGET_H
 #define COPENGLWIDGET_H
 
 // openGL相关库
@@ -69,17 +69,29 @@ public:
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
     QVector<QVector3D> cubePositions = {
-      QVector3D (0.0f,  0.0f,  0.0f),
-      QVector3D( -2.0f,  -5.0f, -15.0f),
-      QVector3D(-1.5f, -2.2f, -2.5f),
-      QVector3D(-3.8f, -2.0f, -12.3f),
-      QVector3D( 2.4f, -0.4f, -3.5f),
-      QVector3D(-1.7f,  3.0f, -7.5f),
-      QVector3D( 1.3f, -2.0f, -2.5f),
-      QVector3D( 1.5f,  2.0f, -2.5f),
-      QVector3D( 1.5f,  0.2f, -1.5f),
-      QVector3D(-1.3f,  1.0f, -1.5f)
+        QVector3D (0.0f,  0.0f,  0.0f),
+        QVector3D( -2.0f,  -5.0f, -15.0f),
+        QVector3D(-1.5f, -2.2f, -2.5f),
+        QVector3D(-3.8f, -2.0f, -12.3f),
+        QVector3D( 2.4f, -0.4f, -3.5f),
+        QVector3D(-1.7f,  3.0f, -7.5f),
+        QVector3D( 1.3f, -2.0f, -2.5f),
+        QVector3D( 1.5f,  2.0f, -2.5f),
+        QVector3D( 1.5f,  0.2f, -1.5f),
+        QVector3D(-1.3f,  1.0f, -1.5f)
     };
+
+    QVector<QVector3D> pointLightPositions = {
+        // QVector3D( 0.7f,  0.2f,  2.0f),
+        // QVector3D( 2.3f, -3.3f, -4.0f),
+        // QVector3D(-4.0f,  2.0f, -12.0f),
+        // QVector3D( 0.0f,  0.0f, -3.0f)
+        QVector3D(1.0f, 0.6f, 0.0f),
+        QVector3D(1.0f, 0.0f, 0.0f),
+       QVector3D(1.0f, 1.0, 0.0),
+       QVector3D(0.2f, 0.2f, 1.0f)
+    };
+
     unsigned int VAO_id,VBO_id;
 
     unsigned int VAO_id_Lighting;
@@ -99,6 +111,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *ev) override;
     void wheelEvent(QWheelEvent *event)override;
 private:
+    void pri_packGLSLdata();
+
+private:
     Shape m_shape;
     QOpenGLShaderProgram shaderProgramObject; // 创建相关的对象
     QOpenGLShaderProgram shaderProgramLighting;
@@ -112,6 +127,7 @@ private:
     QOpenGLTexture *m_TextureSpec;
     QOpenGLTexture *m_TextureCode;
     Camera          m_camera;
+
 };
 
 #endif // COPENGLWIDGET_H

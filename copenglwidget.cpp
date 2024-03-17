@@ -1,4 +1,4 @@
-﻿#include "copenglwidget.h"
+#include "copenglwidget.h"
 #include <QTime>
 #include <QDebug>
 #include <QVector4D>
@@ -156,29 +156,66 @@ void COpenGlWidget::paintGL()
     projection.perspective(m_camera.m_zoom, this->width() / this->height(), 0.1f, 100.0f);
     view = m_camera.GetViewMatrix();
     //view = calculate_lookAt_matrix(m_camera.m_cameraPos,m_camera.m_cameraPos + m_camera.m_cameraLookAtFrontDirection,m_camera.m_cameraUpDirection);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.75f, 0.52f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float cosCut = static_cast<float>(cos(qDegreesToRadians(12.5)));
-    float outerCutOff = static_cast<float>(cos(qDegreesToRadians(25.5)));
+    float outerCutOff = static_cast<float>(cos(qDegreesToRadians(13.0)));
     switch (m_shape){
     case Rect:
         shaderProgramObject.bind();
-        shaderProgramObject.setUniformValue("light.direction",m_camera.m_cameraLookAtFrontDirection);
-        shaderProgramObject.setUniformValue("light.position",m_camera.m_cameraPos);
-        shaderProgramObject.setUniformValue("light.cutOff",cosCut);
-        shaderProgramObject.setUniformValue("light.outerCutOff", outerCutOff);
+
         shaderProgramObject.setUniformValue("viewPos",m_camera.m_cameraPos);
-        // 设置光源属性
-
-        shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.1f, 0.1f, 0.1f));
-        shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.8f, 0.8f, 0.8f)); // 将光照调暗了一些以搭配场景
-        shaderProgramObject.setUniformValue("light.specular",  QVector3D(1.0f, 1.0f, 1.0f));
-
         shaderProgramObject.setUniformValue("material.shininess", 32.0f);
-        // 设置光源衰减系数
-        shaderProgramObject.setUniformValue("light.constant",1.0f);
-        shaderProgramObject.setUniformValue("light.linear",0.09f);
-        shaderProgramObject.setUniformValue("light.quadratic",0.032f);
+
+        // directional light
+        shaderProgramObject.setUniformValue("dirLight.direction", QVector3D(-0.2f, -1.0f, -0.3f));
+        shaderProgramObject.setUniformValue("dirLight.ambient", QVector3D(0.3f, 0.24f, 0.14f));
+        shaderProgramObject.setUniformValue("dirLight.diffuse", QVector3D(0.7f, 0.42f, 0.26f));
+        shaderProgramObject.setUniformValue("dirLight.specular", QVector3D(0.5f, 0.5f, 0.5f));
+
+        // point light 1
+        shaderProgramObject.setUniformValue("pointLights[0].position", pointLightPositions.at(0).x(),pointLightPositions.at(0).y(),pointLightPositions.at(0).z());
+        shaderProgramObject.setUniformValue("pointLights[0].ambient",pointLightPositions.at(0).x() * 0.1,pointLightPositions.at(0).y() * 0.1, pointLightPositions.at(0).z() * 0.1);
+        shaderProgramObject.setUniformValue("pointLights[0].diffuse", pointLightPositions.at(0).x(),pointLightPositions.at(0).y(),pointLightPositions.at(0).z());
+        shaderProgramObject.setUniformValue("pointLights[0].specular", pointLightPositions.at(0).x(),pointLightPositions.at(0).y(),pointLightPositions.at(0).z());
+        shaderProgramObject.setUniformValue("pointLights[0].constant", 1.0f);
+        shaderProgramObject.setUniformValue("pointLights[0].linear", 0.09f);
+        shaderProgramObject.setUniformValue("pointLights[0].quadratic", 0.032f);
+        // point light 2
+        shaderProgramObject.setUniformValue("pointLights[1].position", pointLightPositions.at(1).x(),pointLightPositions.at(1).y(),pointLightPositions.at(1).z());
+        shaderProgramObject.setUniformValue("pointLights[1].ambient", pointLightPositions.at(1).x()* 0.1,pointLightPositions.at(1).y()* 0.1,pointLightPositions.at(1).z()* 0.1);
+        shaderProgramObject.setUniformValue("pointLights[1].diffuse", pointLightPositions.at(1).x(),pointLightPositions.at(1).y(),pointLightPositions.at(1).z());
+        shaderProgramObject.setUniformValue("pointLights[1].specular",pointLightPositions.at(1).x(),pointLightPositions.at(1).y(),pointLightPositions.at(1).z());
+        shaderProgramObject.setUniformValue("pointLights[1].constant", 1.0f);
+        shaderProgramObject.setUniformValue("pointLights[1].linear", 0.09f);
+        shaderProgramObject.setUniformValue("pointLights[1].quadratic", 0.032f);
+        // point light 3
+        shaderProgramObject.setUniformValue("pointLights[2].position", pointLightPositions.at(2).x(),pointLightPositions.at(2).y(),pointLightPositions.at(2).z());
+        shaderProgramObject.setUniformValue("pointLights[2].ambient",pointLightPositions.at(2).x()* 0.1,pointLightPositions.at(2).y()* 0.1,pointLightPositions.at(2).z()* 0.1);
+        shaderProgramObject.setUniformValue("pointLights[2].diffuse", pointLightPositions.at(2).x(),pointLightPositions.at(2).y(),pointLightPositions.at(2).z());
+        shaderProgramObject.setUniformValue("pointLights[2].specular",pointLightPositions.at(2).x(),pointLightPositions.at(2).y(),pointLightPositions.at(2).z());
+        shaderProgramObject.setUniformValue("pointLights[2].constant", 1.0f);
+        shaderProgramObject.setUniformValue("pointLights[2].linear", 0.09f);
+        shaderProgramObject.setUniformValue("pointLights[2].quadratic", 0.032f);
+        // point light 4
+        shaderProgramObject.setUniformValue("pointLights[3].position", pointLightPositions.at(3).x(),pointLightPositions.at(3).y(),pointLightPositions.at(3).z());
+        shaderProgramObject.setUniformValue("pointLights[3].ambient",pointLightPositions.at(3).x()* 0.1,pointLightPositions.at(3).y()* 0.1,pointLightPositions.at(3).z()* 0.1);
+        shaderProgramObject.setUniformValue("pointLights[3].diffuse", pointLightPositions.at(3).x(),pointLightPositions.at(3).y(),pointLightPositions.at(3).z());
+        shaderProgramObject.setUniformValue("pointLights[3].specular", pointLightPositions.at(3).x(),pointLightPositions.at(3).y(),pointLightPositions.at(3).z());
+        shaderProgramObject.setUniformValue("pointLights[3].constant", 1.0f);
+        shaderProgramObject.setUniformValue("pointLights[3].linear", 0.09f);
+        shaderProgramObject.setUniformValue("pointLights[3].quadratic", 0.032f);
+        // spotLight
+        shaderProgramObject.setUniformValue("spotLight.position", m_camera.m_cameraPos);
+        shaderProgramObject.setUniformValue("spotLight.direction", m_camera.m_cameraLookAtFrontDirection);
+        shaderProgramObject.setUniformValue("spotLight.ambient", QVector3D(0.0f, 0.0f, 0.0f));
+        shaderProgramObject.setUniformValue("spotLight.diffuse", QVector3D(0.8f, 0.8f, 0.0f));
+        shaderProgramObject.setUniformValue("spotLight.specular", QVector3D(0.8f, 0.8f, 0.0f));
+        shaderProgramObject.setUniformValue("spotLight.constant", 1.0f);
+        shaderProgramObject.setUniformValue("spotLight.linear", 0.09f);
+        shaderProgramObject.setUniformValue("spotLight.quadratic", 0.032f);
+        shaderProgramObject.setUniformValue("spotLight.cutOff", cosCut);
+        shaderProgramObject.setUniformValue("spotLight.outerCutOff", outerCutOff);
 
         shaderProgramObject.setUniformValue("projection",projection);
         shaderProgramObject.setUniformValue("view",view);
@@ -206,12 +243,18 @@ void COpenGlWidget::paintGL()
         shaderProgramLighting.setUniformValue("projection",projection);
         shaderProgramLighting.setUniformValue("view",view);
         model.setToIdentity();
-        model.translate(lightLocation);
-        model.scale(0.2f,0.2f,0.2f);
-        shaderProgramLighting.setUniformValue("model",model);
-        glBindVertexArray(VAO_id_Lighting);
 
-        glDrawArrays(GL_TRIANGLES,0,36);
+
+        glBindVertexArray(VAO_id_Lighting);
+        for(int i = 0; i < 4; ++i)
+        {
+            model.translate(pointLightPositions[i]);
+            model.scale(0.2f,0.2f,0.2f);
+            shaderProgramLighting.setUniformValue("model",model);
+            glDrawArrays(GL_TRIANGLES,0,36);
+        }
+
+
         shaderProgramLighting.release();
         glBindVertexArray(0);
     default:
@@ -271,6 +314,14 @@ void COpenGlWidget::wheelEvent(QWheelEvent *event)
 {
     m_camera.ProcessMouseScroll(event->angleDelta().y() / 120);
     update();
+}
+
+// 封装数据
+void COpenGlWidget::pri_packGLSLdata()
+{
+    // [0] 平行光源数据
+
+    // [0] 平行光源数据
 }
 void COpenGlWidget::resizeGL(int w, int h)
 {
