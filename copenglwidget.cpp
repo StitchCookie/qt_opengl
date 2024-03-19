@@ -92,7 +92,6 @@ void COpenGlWidget::slots_timeout()
 
 void COpenGlWidget::initializeGL()
 {
-    bool success = false;
     initializeOpenGLFunctions();
     shaderProgramObject.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shapes.vert");
     shaderProgramObject.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shapes.frag");

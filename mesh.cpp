@@ -5,6 +5,7 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     for(unsigned int i = 0; i < textures.size(); i++) {
+
         m_glFuns->glActiveTexture(GL_TEXTURE0 + i);  // 在绑定之前激活相应的纹理单元
         string number;
         string name = textures[i].type;
@@ -12,7 +13,6 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
             number = std::to_string(diffuseNr++);
         else if(name == "texture_specular")
             number = std::to_string(specularNr++);
-
         // 绑定纹理单元到指定的纹理对象
         m_glFuns->glBindTexture(GL_TEXTURE_2D, textures[i].id);
         // 设置采样器统一变量的值，告知着色器从哪个激活的纹理单元进行采样。
@@ -22,6 +22,7 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
     m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
     m_glFuns->glBindVertexArray(0);
 }
+
 
 Mesh::Mesh(QOpenGLFunctions_3_3_Core *glFuns,
            vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
@@ -58,6 +59,12 @@ void Mesh::setupMesh()
                                     (void*)offsetof(Vertex, Normal));
 
     // 顶点纹理坐标
+    //告知显卡如何解析缓冲里的属性值
+    m_glFuns->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    m_glFuns->glEnableVertexAttribArray(0);
+    m_glFuns->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                    (void*)offsetof(Vertex, Normal));
+
     m_glFuns->glEnableVertexAttribArray(1);
     m_glFuns->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                                     (void*)offsetof(Vertex, TexCoords));
