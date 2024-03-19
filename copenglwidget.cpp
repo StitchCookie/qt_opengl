@@ -1,4 +1,4 @@
-﻿#include "copenglwidget.h"
+#include "copenglwidget.h"
 #include <QTime>
 #include <QDebug>
 #include <QVector4D>
@@ -203,7 +203,6 @@ void COpenGlWidget::paintGL()
 
 bool COpenGlWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    //float cameaSpeed = (2.5 * TIMEOUTMESC) / 1000.0;
     float deltaTime = TIMEOUTMESC / 1000.0;
     if (event->type() == QEvent::KeyPress)
     {
