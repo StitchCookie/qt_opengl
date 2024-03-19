@@ -8,7 +8,7 @@
 #define TIMEOUTMESC 100
 float ratio = 0.5;
 
-QVector3D lightLocation = QVector3D(1.2f,1.0f,2.0f);
+QVector3D lightLocation = QVector3D(1.f,1.0f,2.0f);
 
 COpenGlWidget::COpenGlWidget(QWidget *parent):QOpenGLWidget(parent)
 {
@@ -17,11 +17,11 @@ COpenGlWidget::COpenGlWidget(QWidget *parent):QOpenGLWidget(parent)
     m_shape = Rect;
     flag = false;
     installEventFilter(this);
-    timer.setInterval(500);
+    timer.setInterval(50);
     connect(&timer,&QTimer::timeout,this,&COpenGlWidget::slots_timeout);
     timer.start();
     timerElapsed.start();
-    m_camera.m_cameraPos = QVector3D(0.0f,0.0f,3.0f);
+    m_camera.m_cameraPos = QVector3D(0.0f,0.0f,5.0f);
 }
 COpenGlWidget::~COpenGlWidget()
 {
@@ -86,15 +86,6 @@ QMatrix4x4 COpenGlWidget::calculate_lookAt_matrix(QVector3D position, QVector3D 
 
 void COpenGlWidget::slots_timeout()
 {
-    //    float x = static_cast<float>(sin(timerElapsed.elapsed())) * 2.0f;
-    //    float y = static_cast<float>(cos(timerElapsed.elapsed())) / 2.0f;
-    static float yaw = 0;
-    yaw += 0.26;
-    if(yaw > (3.1415926 * 2)) yaw = 0;
-    //    static float length = sqrt(lightLocation.x() * lightLocation.x() + lightLocation.y() * lightLocation.y());
-    //    lightLocation.setX(cos(yaw) * length);
-    //    lightLocation.setY(sin(yaw) * length);
-    //    lightLocation.setZ(sin(yaw) * length);
     update();
 }
 
@@ -134,14 +125,9 @@ void COpenGlWidget::initializeGL()
     shaderProgramObject.setUniformValue("material.diffuse",0); // 将纹理单元的索引传递给着色器
     m_TextureSpec = new QOpenGLTexture(QImage(":/container2_specular.png").mirrored());
     shaderProgramObject.setUniformValue("material.specular",1); // 将纹理单元的索引传递给着色器
-    m_TextureCode = new QOpenGLTexture(QImage(":/matrix.jpg").mirrored());
-    shaderProgramObject.setUniformValue("material.emission",2);
-    shaderProgramObject.release();
     shaderProgramLighting.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shapesLighting.vert");
     shaderProgramLighting.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shapesLighting.frag");
     shaderProgramLighting.link();
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);  // 设置透明度
     glEnable(GL_DEPTH_TEST);
 }
 void COpenGlWidget::paintGL()
@@ -153,7 +139,7 @@ void COpenGlWidget::paintGL()
     QMatrix4x4 model;
     QMatrix4x4 projection;
 
-    projection.perspective(m_camera.m_zoom, this->width() / this->height(), 0.1f, 100.0f);
+    projection.perspective(m_camera.m_zoom, (float)this->width() / this->height(), 0.1f, 100.0f);
     view = m_camera.GetViewMatrix();
     //view = calculate_lookAt_matrix(m_camera.m_cameraPos,m_camera.m_cameraPos + m_camera.m_cameraLookAtFrontDirection,m_camera.m_cameraUpDirection);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -166,11 +152,11 @@ void COpenGlWidget::paintGL()
         shaderProgramObject.setUniformValue("viewPos",m_camera.m_cameraPos);
         // 设置光源属性
 
-        shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.2f, 0.2f, 0.2f));
-        shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.5f, 0.5f, 0.5f)); // 将光照调暗了一些以搭配场景
+        shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.4f, 0.4f, 0.4f));
+        shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.9f, 0.9f, 0.9f));
         shaderProgramObject.setUniformValue("light.specular",  QVector3D(1.0f, 1.0f, 1.0f));
 
-        shaderProgramObject.setUniformValue("material.shininess", 64.0f);
+        shaderProgramObject.setUniformValue("material.shininess", 32.0f);
         // 设置光源衰减系数
         shaderProgramObject.setUniformValue("light.constant",1.0f);
         shaderProgramObject.setUniformValue("light.linear",0.09f);
@@ -184,18 +170,17 @@ void COpenGlWidget::paintGL()
 
         m_Texture->bind(0);
         m_TextureSpec->bind(1);
-        m_TextureCode->bind(2);
         glBindVertexArray(VAO_id);
 
-        for(int i = 0; i < cubePositions.size(); ++i)
-        {
+      //  for(int i = 0; i < cubePositions.size(); ++i)
+      //  {
             model.setToIdentity();
-            model.translate(cubePositions[i]);
+       //     model.translate(cubePositions[i]);
 
-            model.rotate(20.0f * i,1.0f,0.3f,0.5f);
+            model.rotate(timerElapsed.elapsed() / 50,1.0f,1.0f,0.5f);
             shaderProgramObject.setUniformValue("model",model);
             glDrawArrays(GL_TRIANGLES,0,36);
-        }
+     //   }
 
         shaderProgramObject.release();
         shaderProgramLighting.bind();

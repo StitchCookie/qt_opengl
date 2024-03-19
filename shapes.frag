@@ -6,8 +6,8 @@ struct Material {
 };
 
 struct Light {
-    //vec3 direction;  平行光时使用
-    vec3 position;
+    vec3 direction;  //平行光时使用
+    //vec3 position;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -32,16 +32,17 @@ in vec2 TexCoords;  // 纹理坐标
 void main(){
 
     // 计算距离
-    float distance = length(light.position - FragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    //float distance = length(light.position - FragPos);
+    //float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     // 设置环境光 = 光源Xambient材质属性
-    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
+    vec3 ambient = light.ambient * texture(material.diffuse,TexCoords).rgb;
 
     // 将法线单位化
     vec3 norm = normalize(Normal);
     // 将光的方向向量单位化
-    vec3 lightDir = normalize(light.position - FragPos);
+    //vec3 lightDir = normalize(light.position - FragPos);
+    vec3 lightDir = normalize(-light.direction);
     // 只有在小于90度时才会贡献漫反射光照
     float diff = max(dot(norm,lightDir),0.0f);
     // 漫反射光照值 = 光源 X 角度 X diffuse材质向量
@@ -56,9 +57,9 @@ void main(){
     // 散射属性 = 光源 * 镜面高光的散射/半径 * 散射属性
     vec3 specular = light.specular * (spec * texture(material.specular,TexCoords).rgb);
 
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+    //ambient *= attenuation;
+   // diffuse *= attenuation;
+   // specular *= attenuation;
     vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result,1.0f);
 }
