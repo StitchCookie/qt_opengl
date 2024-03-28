@@ -1,0 +1,4 @@
+<RCC>
+    <qresource prefix="/texture"/>
+    <qresource prefix="/new/prefix1"/>
+</RCC>

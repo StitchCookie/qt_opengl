@@ -64,15 +64,15 @@ protected:
 private:
     Shape m_shape;
     QOpenGLShaderProgram shaderProgramObject; // 创建相关的对象
-    QOpenGLShaderProgram roundProgramObject; // 轮廓
     bool flag;
     QElapsedTimer  timerElapsed;
     QTimer         timer;
     Camera          m_camera;
+    Mesh*           m_boxMesh;
     Mesh*           m_gressMesh;
     Mesh*           m_planeMesh;
-    QOpenGLTexture  *m_boxTex;
-    QOpenGLTexture  *m_planeTex;
+    QOpenGLTexture  *m_CubeTex;
+    QOpenGLTexture  *m_floorTex;
     QOpenGLTexture  *m_gressTex;
 
     QMap<QString,ModelInfo> m_Models;
