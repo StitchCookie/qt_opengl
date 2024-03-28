@@ -156,11 +156,13 @@ void COpenGlWidget::initializeGL()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);  // 只是剔除背向面
+    glFrontFace(GL_CW);  //顺时针为正向面
     m_boxMesh   = processMesh(cubeVertices,36,m_CubeTex->textureId());
     m_planeMesh = processMesh(planeVertices,6,m_floorTex->textureId());
     m_gressMesh = processMesh(transparentVertices,6,m_gressTex->textureId());
-
-
 }
 
 
@@ -195,14 +197,14 @@ void COpenGlWidget::paintGL()
     model.setToIdentity();
     m_planeMesh->Draw(shaderProgramObject);
 
-    //最后绘制透明的模型
-    for(map<float,QVector3D>::reverse_iterator riter=sorted.rbegin();
-        riter!=sorted.rend();riter++){
-        model.setToIdentity();
-        model.translate(riter->second);
-        shaderProgramObject.setUniformValue("model", model);
-        m_gressMesh->Draw(shaderProgramObject);
-    }
+    //最后绘制透明的模型   本章模型不需要绘制玻璃
+//    for(map<float,QVector3D>::reverse_iterator riter=sorted.rbegin();
+//        riter!=sorted.rend();riter++){
+//        model.setToIdentity();
+//        model.translate(riter->second);
+//        shaderProgramObject.setUniformValue("model", model);
+//        m_gressMesh->Draw(shaderProgramObject);
+//    }
 }
 bool COpenGlWidget::eventFilter(QObject *watched, QEvent *event)
 {
