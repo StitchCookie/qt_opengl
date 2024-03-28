@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shapes.frag</file>
+        <file>shapes.vert</file>
+        <file>grass.png</file>
+        <file>marble.jpg</file>
+        <file>metal.png</file>
+        <file>window.png</file>
+    </qresource>
+</RCC>
