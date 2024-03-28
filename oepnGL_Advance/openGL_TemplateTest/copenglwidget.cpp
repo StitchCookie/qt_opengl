@@ -95,7 +95,7 @@ void COpenGlWidget::loadModel(string path)
     static int i = 1;
     makeCurrent();
     Model  *m_model = new Model(QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>()
-                                ,path.c_str());
+                               ,path.c_str());
     m_Models["模型"+QString::number(i)] = ModelInfo{m_model,QVector3D(0,0 - m_model->m_minY,0) ,0.0,0.0,0.0,false,"模型"+QString::number(i)};
     //m_camera.Position = cameraPosInit(m_model->m_maxY,m_model->m_minY);
     i++;
@@ -133,7 +133,14 @@ void COpenGlWidget::initializeGL()
     shaderProgramObject.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shapes.vert");
     shaderProgramObject.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shapes.frag");
     shaderProgramObject.link();
+
+
+    roundProgramObject.addCacheableShaderFromSourceFile(QOpenGLShader::Vertex,":/shapes.vert");
+    roundProgramObject.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment,":/signleshapes.frag");
+    roundProgramObject.link();
+
     if(!shaderProgramObject.isLinked()) qDebug()<<"ERR:"<<shaderProgramObject.log();
+    if(!roundProgramObject.isLinked()) qDebug()<<"ERR:"<<roundProgramObject.log();
     m_planeTex = new QOpenGLTexture(QImage(":/matrix.jpg").mirrored());
     m_planeMesh = processMesh(planeVertices,6,m_planeTex->textureId());
 
@@ -151,8 +158,10 @@ void COpenGlWidget::paintGL()
     view = m_camera.GetViewMatrix();
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_ALWAYS);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glStencilMask(0x00);
     switch (m_shape){
     case Rect:
         shaderProgramObject.bind();
@@ -163,28 +172,54 @@ void COpenGlWidget::paintGL()
 
 
         // 设置光源属性
-
         shaderProgramObject.setUniformValue("light.ambient",   QVector3D(0.8f, 0.8f, 0.8f));
         shaderProgramObject.setUniformValue("light.diffuse",   QVector3D(0.9f, 0.9f, 0.9f));
         shaderProgramObject.setUniformValue("light.specular",  QVector3D(1.0f, 1.0f, 1.0f));
-
         shaderProgramObject.setUniformValue("material.shininess", 32.0f);
-
-
         shaderProgramObject.setUniformValue("light.direction",QVector3D(-0.2f, -1.0f, -0.3f));
         shaderProgramObject.setUniformValue("model",model);
         m_planeMesh->Draw(shaderProgramObject);
+        shaderProgramObject.release();
+
+        roundProgramObject.bind();
+        roundProgramObject.setUniformValue("projection",projection);
+        roundProgramObject.setUniformValue("view",view);
+        roundProgramObject.release();
 
         if(m_Models.size() <= 0) return;
         foreach (auto item,m_Models) {
             model.setToIdentity();
             model.translate(item.worldPos);
-
             model.rotate(item.pitch,QVector3D(1.0,0.0,0.0));
             model.rotate(item.yaw,QVector3D(0.0,1.0,0.0));
             model.rotate(item.roll,QVector3D(0.0,0.0,1.0));
+
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilMask(0xFF);
+            shaderProgramObject.bind();
             shaderProgramObject.setUniformValue("model",model);
             item.mode->Draw(shaderProgramObject);
+            shaderProgramObject.release();
+            if(item.isSelected == false) continue;
+
+
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            float height = item.mode->m_maxY - item.mode->m_minY;
+            float width = item.mode->m_maxX- item.mode->m_minX;
+
+            if(item.mode->m_minY >= 0)
+                model.translate(0.0f,(height) / 2,0.0f);
+            model.scale(1.1f,1.0 + 0.1 *(width / height));
+            if(item.mode->m_minY >= 0)
+                model.translate(0.0f,-(height) / 2,0.0f);
+            roundProgramObject.bind();
+            roundProgramObject.setUniformValue("model",model);
+            item.mode->Draw(roundProgramObject);
+            roundProgramObject.release();
+            glStencilMask(0xFF);
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
         }
     default:
         break;
@@ -224,13 +259,13 @@ void COpenGlWidget::mouseMoveEvent(QMouseEvent *event)
             ModelInfo *modelInfo=&iter.value();
             if(!modelInfo->isSelected) continue;
             modelInfo->worldPos=
-                    QVector3D(API_worldPosToViewPos(event->pos().x(),event->pos().y()));
+                QVector3D(API_worldPosToViewPos(event->pos().x(),event->pos().y()));
         }
     }else
     {
         if(event->buttons() & Qt::RightButton
-                || event->buttons() & Qt::LeftButton
-                || event->buttons() & Qt::MiddleButton ){
+            || event->buttons() & Qt::LeftButton
+            || event->buttons() & Qt::MiddleButton ){
 
             auto currentPos=event->pos();
             QPoint deltaPos=currentPos-lastPos;

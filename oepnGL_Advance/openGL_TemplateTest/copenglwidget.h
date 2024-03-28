@@ -64,6 +64,7 @@ protected:
 private:
     Shape m_shape;
     QOpenGLShaderProgram shaderProgramObject; // 创建相关的对象
+    QOpenGLShaderProgram roundProgramObject; // 轮廓
     bool flag;
     QElapsedTimer  timerElapsed;
     QTimer         timer;

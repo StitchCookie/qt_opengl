@@ -6,11 +6,10 @@
         <file>container.jpg</file>
         <file>wall.jpg</file>
         <file>wrap.png</file>
-        <file>shapesLighting.frag</file>
         <file>container2.png</file>
         <file>container2_specular.png</file>
-        <file>shapesLighting.vert</file>
         <file>lighting_maps_specular_color.png</file>
         <file>matrix.jpg</file>
+        <file>signleshapes.frag</file>
     </qresource>
 </RCC>
